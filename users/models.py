@@ -9,6 +9,7 @@ from base.services import get_user_main_image_path, get_user_background_image_pa
 class User(AbstractUser):
     """ Модель пользователя """
     phone = PhoneNumberField(verbose_name='Номер телефона', unique=True, region='RU')
+    email = models.EmailField(verbose_name='Электронная почта', unique=True)
     main_image = models.ImageField(
         upload_to=get_user_main_image_path,
         verbose_name='Изображение пользователя',
@@ -25,7 +26,7 @@ class User(AbstractUser):
     )
     username = models.CharField(max_length=63, verbose_name='Имя пользователя', unique=True)
 
-    REQUIRED_FIELDS = ['phone', 'email']
+    REQUIRED_FIELDS = ["email", "phone"]
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -33,6 +34,8 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
 
 
 class Subscribers(models.Model):

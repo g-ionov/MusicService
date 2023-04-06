@@ -46,15 +46,23 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response({'token': JWTAuthentication.generate_token(serializer.validated_data['user'])},
                         status=status.HTTP_200_OK)
 
-    @action(methods=['get', 'post'], detail=False, url_path='me', url_name='me')
+    @action(methods=['get', 'patch', 'put', 'delete'], detail=False, url_path='me', url_name='me')
     def me(self, request):
         """ Получить данные пользователя или обновить их"""
-        serializer = self.get_serializer(request.user)
+        if request.method in ['GET', 'DELETE']:
+            serializer = self.get_serializer(request.user)
+            if request.method == 'DELETE':
+                request.user.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            serializer = self.get_serializer(request.user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['get', 'post'], detail=True, url_path='subscribers', url_name='subscribers')
     def get_user_subscribers(self, request, pk):
-        """ Получить подписчиков пользователя или подписаться на пользователя"""
+        """ Получить подписчиков пользователя или подписаться на него"""
         if request.method == 'GET':
             serializer = self.get_serializer(get_user_subscribers(pk), many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
