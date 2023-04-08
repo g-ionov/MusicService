@@ -1,4 +1,7 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
+from rest_framework.filters import SearchFilter, OrderingFilter
+
 from .authentication import JWTAuthentication
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -14,6 +17,8 @@ class UserViewSet(viewsets.ModelViewSet):
     """ API для пользователей """
     serializer_class = serializers.UserSerializer
     queryset = User.objects.all()
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ordering_fields = ['username', 'first_name', 'last_name']
 
     def get_permissions(self):
         if self.action in ['update', 'partial_update', 'destroy']:
@@ -67,5 +72,4 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(get_user_subscribers(pk), many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         elif request.method == 'POST':
-            subscribe_user(pk, request.user)
-            return Response(status=status.HTTP_201_CREATED)
+            return Response(status=subscribe_user(pk, request.user))

@@ -36,8 +36,6 @@ class User(AbstractUser):
         return self.username
 
 
-
-
 class Subscribers(models.Model):
     """ Модель подписчиков """
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь', related_name='owner')
