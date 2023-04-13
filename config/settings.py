@@ -2,6 +2,8 @@ import datetime
 import os
 from pathlib import Path
 
+from django.urls import reverse
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -31,6 +33,7 @@ INSTALLED_APPS = [
     'django_filters',
     'phonenumber_field',
     'social_django',
+    "debug_toolbar",
 
     'music',
     'users',
@@ -44,6 +47,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -107,6 +111,10 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
@@ -140,7 +148,8 @@ ACCESS_TOKEN_LIFETIME = datetime.timedelta(days=7)
 TOKEN_ENCODING_ALGORITHM = 'HS256'
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': ('users.authentication.JWTAuthentication',),
+    'DEFAULT_AUTHENTICATION_CLASSES': ('users.authentication.JWTAuthentication',
+                                       'rest_framework.authentication.SessionAuthentication'),
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny',),
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
@@ -159,7 +168,20 @@ SOCIAL_AUTH_POSTGRES_JSONFIELD_ENABLED = True
 
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/'
 
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    'social_core.pipeline.social_auth.associate_by_email',
+    'social_core.pipeline.user.create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
+)
+
 LOGOUT_REDIRECT_URL = '/'
+SOCIAL_AUTH_USER_MODEL = 'users.User'
 
 SOCIAL_AUTH_YANDEX_OAUTH2_KEY = 'cf2b7f9a160a4756b330b70a748b95a6'
 SOCIAL_AUTH_YANDEX_OAUTH2_SECRET = 'cd764c14907444428ae11a8c2b5a7a9f'

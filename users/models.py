@@ -39,7 +39,7 @@ class User(AbstractUser):
 class Subscribers(models.Model):
     """ Модель подписчиков """
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь', related_name='owner')
-    subscriber = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Подписчик', related_name='subscribers')
+    subscriber = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Подписчик', related_name='subscriber')
     date = models.DateTimeField(auto_now_add=True, verbose_name='Дата подписки')
 
     class Meta:

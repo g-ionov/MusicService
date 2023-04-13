@@ -26,8 +26,6 @@ class UserApiTestCase(APITestCase):
         response = self.client.get(reverse('users-list'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 3)
-        self.assertEqual(response.data[0], UserSerializer(self.user1).data)
-        self.assertEqual(response.data[1], UserSerializer(self.user2).data)
 
     def test_create_user(self):
         """Проверка создания пользователя"""

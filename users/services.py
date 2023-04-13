@@ -1,19 +1,31 @@
+from django.db.models import QuerySet, Count, Case, When, Sum
 from rest_framework import status
 
-from .models import User, Subscribers, SocialMedia, SocialLink
+from .models import User, Subscribers, SocialLink
 
 
-def get_user_subscribers(user):
+def get_users() -> QuerySet:
+    """ Получить список пользователей вместе с количеством подписчиков и подписок """
+    return User.objects.annotate(subscribers_count=Count('owner'), subscriptions_count=Count('subscriber'))
+
+
+def get_user(user_id: int) -> User:
+    """ Получить пользователя по id вместе со ссылками на социальные сети,
+     подписчиками, их количеством и количеством подписок. """
+    return get_users().prefetch_related('sociallink_set').get(id=user_id)
+
+
+def get_user_subscribers(user: User) -> QuerySet:
     """ Получить подписчиков пользователя """
-    return Subscribers.objects.filter(user=user)
+    return Subscribers.objects.prefetch_related('user').filter(user=user)
 
 
-def count_user_subscribers(user):
+def count_user_subscribers(user: User) -> int:
     """ Получить количество подписчиков пользователя """
     return get_user_subscribers(user).count()
 
 
-def count_user_subscriptions(user):
+def count_user_subscriptions(user: User) -> int:
     """ Получить количество подписок пользователя """
     return Subscribers.objects.filter(subscriber=user).count()
 
@@ -38,7 +50,6 @@ def subscribe_user(user_id: int, subscriber: User) -> int:
         return status.HTTP_201_CREATED
 
 
-def get_social_links(user):
+def get_social_links(user: User) -> QuerySet:
     """ Получить социальные ссылки пользователя """
     return SocialLink.objects.filter(user=user).select_related('social_media').values('social_media__name', 'url')
-

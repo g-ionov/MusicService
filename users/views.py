@@ -10,20 +10,20 @@ from rest_framework.response import Response
 from users.models import User
 from users.permissions import IsThatUserOrStaff
 from users import serializers
-from users.services import get_user_subscribers, subscribe_user
+from users.services import get_user_subscribers, subscribe_user, get_users, get_user
 
 
 class UserViewSet(viewsets.ModelViewSet):
     """ API для пользователей """
     serializer_class = serializers.UserSerializer
-    queryset = User.objects.all()
+    queryset = get_users()
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ordering_fields = ['username', 'first_name', 'last_name']
 
     def get_permissions(self):
         if self.action in ['update', 'partial_update', 'destroy']:
             permission_classes = [IsThatUserOrStaff]
-        elif self.action in ['me', 'logout']:
+        elif self.action == 'me':
             permission_classes = [IsAuthenticated]
         else:
             permission_classes = [AllowAny]
@@ -55,7 +55,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def me(self, request):
         """ Получить данные пользователя или обновить их"""
         if request.method in ['GET', 'DELETE']:
-            serializer = self.get_serializer(request.user)
+            serializer = self.get_serializer(get_user(request.user.pk))
             if request.method == 'DELETE':
                 request.user.delete()
                 return Response(status=status.HTTP_204_NO_CONTENT)

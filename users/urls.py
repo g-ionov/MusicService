@@ -11,6 +11,5 @@ router.register(r'', views.UserViewSet, basename='users')
 urlpatterns = [
     path('yandex_login/', auth_views.yandex_login, name='yandex_login'),
     path('vk_login/', auth_views.vk_login, name='vk_login'),
-    path('logout/', views.UserViewSet.as_view, {'action': 'logout'}, name='logout'),
     path('', include(router.urls)),
 ]

@@ -6,47 +6,52 @@ from .services import count_user_subscribers, get_user_subscribers, get_social_l
 
 class UserSerializer(serializers.ModelSerializer):
     """ Сериализатор пользователя"""
-    subscribers = serializers.SerializerMethodField()
+    subscribers = serializers.IntegerField(source='subscribers_count', read_only=True, default=0)
+    subscriptions = serializers.IntegerField(source='subscriptions_count', read_only=True, default=0)
 
     class Meta:
         model = User
-        fields = ('username', 'phone', 'email', 'subscribers', 'main_image', 'background_image')
-        read_only_fields = ('id', 'date_joined', 'last_login')
+        fields = ('username', 'phone', 'email', 'subscribers', 'subscriptions', 'main_image', 'background_image')
 
-    def get_subscribers(self, obj):
-        return count_user_subscribers(obj)
+
+class SimpleUserSerializer(serializers.ModelSerializer):
+    """ Сериализатор пользователя с минимальной информацией"""
+
+    class Meta:
+        model = User
+        fields = ('username', 'main_image')
 
 
 class SocialLinkSerializer(serializers.Serializer):
     """ Сериализатор ссылки на социальную сеть """
-    name = serializers.CharField(max_length=63, source='social_media__name')
+    name = serializers.CharField(max_length=63, source='social_media.name')
     url = serializers.CharField(max_length=255)
+
+
+class UserSubscribersSerializer(serializers.ModelSerializer):
+    """ Сериализатор подписчиков пользователя """
+    user = SimpleUserSerializer(read_only=True)
+
+    class Meta:
+        model = Subscribers
+        fields = ('user', 'date')
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
     """ Сериализатор пользователя с подробной информацией """
-    subscribers = serializers.SerializerMethodField()
-    subscribers_list = serializers.SerializerMethodField()
-    social_links = serializers.SerializerMethodField()
+    subscribers = serializers.IntegerField(source='subscribers_count', read_only=True, default=0)
+    subscriptions = serializers.IntegerField(source='subscriptions_count', read_only=True, default=0)
+    social_links = SocialLinkSerializer(many=True, read_only=True, source='sociallink_set')
 
     class Meta:
         model = User
-        fields = ('username', 'phone', 'email', 'subscribers', 'subscribers_list', 'social_links',
-                  'main_image', 'background_image')
-        read_only_fields = ('id', 'date_joined', 'last_login')
-
-    def get_subscribers(self, obj):
-        return count_user_subscribers(obj)
-
-    def get_subscribers_list(self, obj):
-        return UserSubscribersSerializer(get_user_subscribers(obj), many=True).data
-
-    def get_social_links(self, obj):
-        return SocialLinkSerializer(social_links(obj), many=True).data
+        fields = (
+        'username', 'phone', 'email', 'subscribers', 'subscriptions', 'social_links', 'main_image', 'background_image')
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
     """ Сериализатор создания пользователя """
+
     class Meta:
         model = User
         fields = ('username', 'phone', 'email', 'password')
@@ -57,17 +62,9 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return user
 
 
-class UserSubscribersSerializer(serializers.ModelSerializer):
-    """ Сериализатор подписчиков пользователя """
-    subscriber = UserSerializer()
-
-    class Meta:
-        model = Subscribers
-        fields = ('subscriber', 'date')
-
-
 class UserSubscribersCreateSerializer(serializers.ModelSerializer):
     """ Сериализатор создания подписчика пользователя """
+
     class Meta:
         model = Subscribers
         fields = ('user',)
@@ -91,7 +88,6 @@ class UserLoginSerializer(serializers.Serializer):
                 raise serializers.ValidationError('Неверные имя пользователя или пароль')
         else:
             raise serializers.ValidationError('Необходимо ввести имя пользователя и пароль')
-
 
 
 class EmptySerializer(serializers.Serializer):
