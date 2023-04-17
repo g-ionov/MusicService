@@ -15,9 +15,18 @@ def get_user(user_id: int) -> User:
     return get_users().prefetch_related('sociallink_set').get(id=user_id)
 
 
+def merge_users_and_subscribers()-> QuerySet:
+    """ Выполнить JOIN таблиц пользователей и подписчиков """
+    return Subscribers.objects.select_related('user').select_related('subscriber')
+
+
 def get_user_subscribers(user: User) -> QuerySet:
     """ Получить подписчиков пользователя """
-    return Subscribers.objects.prefetch_related('user').filter(user=user)
+    return merge_users_and_subscribers().filter(user=user)
+
+def get_user_subscriptions(user: User) -> QuerySet:
+    """ Получить подписки пользователя """
+    return merge_users_and_subscribers().filter(subscriber=user)
 
 
 def count_user_subscribers(user: User) -> int:

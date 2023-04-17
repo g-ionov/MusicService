@@ -1,16 +1,14 @@
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.filters import SearchFilter, OrderingFilter
 
-from .authentication import JWTAuthentication
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
-from users.models import User
+from users.authentication import JWTAuthentication
 from users.permissions import IsThatUserOrStaff
 from users import serializers
-from users.services import get_user_subscribers, subscribe_user, get_users, get_user
+from users.services import get_user_subscribers, subscribe_user, get_users, get_user, get_user_subscriptions
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -32,14 +30,13 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         switcher = {
             'create': serializers.UserCreateSerializer,
-            'get_user_subscribers': serializers.UserSubscribersSerializer,
+            'get_user_subscribers': serializers.SubscribersSerializer,
+            'subscribe': serializers.EmptySerializer,
+            'get_user_subscriptions': serializers.UserSubscriptionsSerializer,
             'login': serializers.UserLoginSerializer,
             'retrieve': serializers.UserDetailSerializer,
             'me': serializers.UserDetailSerializer,
         }
-
-        if self.action == 'get_user_subscribers' and self.request.method == 'POST':
-            return serializers.EmptySerializer
         return switcher.get(self.action, serializers.UserSerializer)
 
 
@@ -65,11 +62,19 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(methods=['get', 'post'], detail=True, url_path='subscribers', url_name='subscribers')
+    @action(detail=True, url_path='subscribers', url_name='subscribers')
     def get_user_subscribers(self, request, pk):
         """ Получить подписчиков пользователя или подписаться на него"""
-        if request.method == 'GET':
-            serializer = self.get_serializer(get_user_subscribers(pk), many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        elif request.method == 'POST':
-            return Response(status=subscribe_user(pk, request.user))
+        serializer = self.get_serializer(get_user_subscribers(pk), many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, url_path='subscriptions', url_name='subscriptions')
+    def get_user_subscriptions(self, request, pk):
+        """ Получить подписки пользователя """
+        serializer = self.get_serializer(get_user_subscriptions(pk), many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['post'], detail=True, url_path='subscribe', url_name='subscribe')
+    def subscribe(self, request, pk):
+        """ Подписаться на пользователя """
+        return Response(status=subscribe_user(pk, request.user))

@@ -6,7 +6,7 @@ from rest_framework.test import APITestCase
 from users.models import User
 from users.serializers import UserSerializer, UserDetailSerializer
 from users.authentication import JWTAuthentication
-from users.services import count_user_subscribers, count_user_subscriptions
+from users.services import count_user_subscribers, count_user_subscriptions, subscribe_user
 
 
 class UserApiTestCase(APITestCase):
@@ -152,21 +152,40 @@ class UserApiTestCase(APITestCase):
         self.client.force_authenticate(user=self.user1)
 
         # Проверка подписки
-        response = self.client.post(reverse('users-subscribers', args=[self.user2.pk]))
+        response = self.client.post(reverse('users-subscribe', args=[self.user2.pk]))
         self.assertEqual(response.status_code, 201)
         self.assertEqual(count_user_subscribers(self.user2), 1)
 
         # Проверка отписки
-        response = self.client.post(reverse('users-subscribers', args=[self.user2.pk]))
+        response = self.client.post(reverse('users-subscribe', args=[self.user2.pk]))
         self.assertEqual(response.status_code, 204)
         self.assertEqual(count_user_subscribers(self.user2), 0)
 
         # Проверка подписки на себя
-        response = self.client.post(reverse('users-subscribers', args=[self.user1.pk]))
+        response = self.client.post(reverse('users-subscribe', args=[self.user1.pk]))
         self.assertEqual(response.status_code, 400)
         self.assertEqual(count_user_subscribers(self.user1), 0)
 
         # Проверка подписки на несуществующего пользователя
-        response = self.client.post(reverse('users-subscribers', args=[100]))
+        response = self.client.post(reverse('users-subscribe', args=[100]))
         self.assertEqual(response.status_code, 404)
         self.assertEqual(count_user_subscriptions(self.user1), 0)
+
+    def test_user_subscriptions(self):
+        """Проверка получения подписок пользователя"""
+        subscribe_user(self.user2.pk, self.user1)
+        subscribe_user(self.staff.pk, self.user1)
+        response = self.client.get(reverse('users-subscriptions', args=[self.user1.pk]))
+        self.assertEqual(response.status_code, 200)
+
+        subscribe_user(self.user1.pk, self.user2)
+        response = self.client.get(reverse('users-subscriptions', args=[self.user2.pk]))
+        self.assertEqual(response.status_code, 200)
+
+
+    def test_user_subscribers(self):
+        """Проверка получения подписчиков пользователя"""
+        subscribe_user(self.user1.pk, self.user2)
+        subscribe_user(self.user1.pk, self.staff)
+        response = self.client.get(reverse('users-subscribers', args=[self.user1.pk]))
+        self.assertEqual(response.status_code, 200)

@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from .models import User, Subscribers
-from .services import count_user_subscribers, get_user_subscribers, get_social_links as social_links
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -28,8 +27,17 @@ class SocialLinkSerializer(serializers.Serializer):
     url = serializers.CharField(max_length=255)
 
 
-class UserSubscribersSerializer(serializers.ModelSerializer):
+class SubscribersSerializer(serializers.ModelSerializer):
     """ Сериализатор подписчиков пользователя """
+    subscriber = SimpleUserSerializer(read_only=True)
+
+    class Meta:
+        model = Subscribers
+        fields = ('subscriber', 'date')
+
+
+class UserSubscriptionsSerializer(serializers.ModelSerializer):
+    """ Сериализатор подписок пользователя """
     user = SimpleUserSerializer(read_only=True)
 
     class Meta:
