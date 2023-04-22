@@ -25,6 +25,7 @@ class User(AbstractUser):
         validators=[FileExtensionValidator(allowed_extensions=['jpg', 'png']), file_size_validator]
     )
     username = models.CharField(max_length=63, verbose_name='Имя пользователя', unique=True)
+    social_links = models.ManyToManyField('SocialMedia', through='SocialLink', verbose_name='Социальные сети')
 
     REQUIRED_FIELDS = ["email", "phone"]
 

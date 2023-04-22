@@ -13,7 +13,6 @@ from users.services import get_user_subscribers, subscribe_user, get_users, get_
 
 class UserViewSet(viewsets.ModelViewSet):
     """ API для пользователей """
-    serializer_class = serializers.UserSerializer
     queryset = get_users()
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ordering_fields = ['username', 'first_name', 'last_name']

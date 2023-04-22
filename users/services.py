@@ -1,4 +1,4 @@
-from django.db.models import QuerySet, Count, Case, When, Sum
+from django.db.models import QuerySet, Count, Prefetch
 from rest_framework import status
 
 from .models import User, Subscribers, SocialLink
@@ -10,9 +10,8 @@ def get_users() -> QuerySet:
 
 
 def get_user(user_id: int) -> User:
-    """ Получить пользователя по id вместе со ссылками на социальные сети,
-     подписчиками, их количеством и количеством подписок. """
-    return get_users().prefetch_related('sociallink_set').get(id=user_id)
+    """ Получить пользователя по id вместе с количеством подписчиков и подписок. """
+    return get_users().get(id=user_id)
 
 
 def merge_users_and_subscribers()-> QuerySet:
