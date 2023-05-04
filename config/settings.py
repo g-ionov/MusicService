@@ -144,6 +144,9 @@ AUTH_USER_MODEL = 'users.User'
 # Размер загружаемых изображений в МБ
 IMAGE_SIZE_LIMIT = 4
 
+# Размер загружаемых аудио в МБ
+AUDIO_SIZE_LIMIT = 50
+
 ACCESS_TOKEN_LIFETIME = datetime.timedelta(days=7)
 TOKEN_ENCODING_ALGORITHM = 'HS256'
 

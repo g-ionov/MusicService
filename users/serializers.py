@@ -5,7 +5,7 @@ from .services import get_social_links
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """ Сериализатор пользователя"""
+    """ User serializer """
     subscribers = serializers.IntegerField(source='subscribers_count', read_only=True, default=0)
     subscriptions = serializers.IntegerField(source='subscriptions_count', read_only=True, default=0)
 
@@ -15,7 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class SimpleUserSerializer(serializers.ModelSerializer):
-    """ Сериализатор пользователя с минимальной информацией"""
+    """Serializer for user with simple information"""
 
     class Meta:
         model = User
@@ -23,14 +23,13 @@ class SimpleUserSerializer(serializers.ModelSerializer):
 
 
 class SocialLinkSerializer(serializers.Serializer):
-    """ Сериализатор ссылки на социальную сеть """
+    """ Serializer for social links """
     name = serializers.CharField(max_length=63, source='social_media__name')
     url = serializers.URLField(max_length=255)
 
 
-
 class SubscribersSerializer(serializers.ModelSerializer):
-    """ Сериализатор подписчиков пользователя """
+    """ Serializer for subscribers """
     subscriber = SimpleUserSerializer(read_only=True)
 
     class Meta:
@@ -39,7 +38,7 @@ class SubscribersSerializer(serializers.ModelSerializer):
 
 
 class UserSubscriptionsSerializer(serializers.ModelSerializer):
-    """ Сериализатор подписок пользователя """
+    """ Serializer for user subscriptions """
     user = SimpleUserSerializer(read_only=True)
 
     class Meta:
@@ -48,7 +47,7 @@ class UserSubscriptionsSerializer(serializers.ModelSerializer):
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
-    """ Сериализатор пользователя с подробной информацией """
+    """ User detail serializer """
     subscribers = serializers.IntegerField(source='subscribers_count', read_only=True, default=0)
     subscriptions = serializers.IntegerField(source='subscriptions_count', read_only=True, default=0)
     socials = serializers.SerializerMethodField()
@@ -59,12 +58,12 @@ class UserDetailSerializer(serializers.ModelSerializer):
         'username', 'phone', 'email', 'subscribers', 'subscriptions', 'socials', 'main_image', 'background_image')
 
     def get_socials(self, obj):
-        """ Получить список ссылок на социальные сети """
+        """ Get social links """
         return SocialLinkSerializer(get_social_links(obj), many=True).data
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
-    """ Сериализатор создания пользователя """
+    """ Serializer for user registration """
 
     class Meta:
         model = User
@@ -76,9 +75,8 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return user
 
 
-
 class UserLoginSerializer(serializers.Serializer):
-    """ Сериализатор аутентификации пользователя """
+    """ User login serializer """
     username = serializers.CharField(max_length=150)
     password = serializers.CharField(max_length=128, write_only=True)
 
@@ -98,6 +96,6 @@ class UserLoginSerializer(serializers.Serializer):
 
 
 class EmptySerializer(serializers.Serializer):
-    """ Пустой сериализатор.
-     Используется для валидации запроса без тела."""
+    """ Empty serializer.
+    Used for POST requests with empty body."""
     pass
