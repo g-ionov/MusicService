@@ -8,7 +8,6 @@ class TrackAdmin(admin.ModelAdmin):
     """ Track admin """
     list_display = ('id', 'name', 'album', 'auditions', 'likes')
     search_fields = ('name',)
-    readonly_fields = ('get_image',)
     list_display_links = ('id', 'name')
 
 
