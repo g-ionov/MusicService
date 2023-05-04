@@ -62,6 +62,7 @@ class Playlist(models.Model):
     """ Playlist model """
     name = models.CharField(max_length=255, verbose_name='Title')
     description = models.TextField(verbose_name='Description')
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='User', related_name='playlists')
     likes = models.PositiveIntegerField(verbose_name='Likes', default=0)
     public = models.BooleanField(verbose_name='Public', default=False)
     created_at = models.DateTimeField(verbose_name='Created at', auto_now_add=True)
