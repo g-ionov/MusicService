@@ -1,7 +1,7 @@
+from django.core.validators import FileExtensionValidator
 from django.db import models
 
 from base.services import image_size_validator
-from users.models import User
 
 
 class Album(models.Model):
@@ -11,8 +11,10 @@ class Album(models.Model):
 
     name = models.CharField(max_length=255, verbose_name='Title')
     date = models.DateField(verbose_name='Date', auto_now_add=True)
-    cover = models.ImageField(upload_to='covers/', verbose_name='Cover',
-                              validators=[image_size_validator], allowed_extensions=['jpg', 'png'])
+    cover = models.ImageField(
+        upload_to='covers/',
+        verbose_name='Cover',
+        validators=[image_size_validator, FileExtensionValidator(allowed_extensions=['jpg', 'png'])])
     description = models.TextField(verbose_name='Description')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
     genre = models.ForeignKey('Genre', on_delete=models.SET_NULL, verbose_name='Genre', related_name='albums', null=True)
@@ -64,8 +66,9 @@ class Playlist(models.Model):
     public = models.BooleanField(verbose_name='Public', default=False)
     created_at = models.DateTimeField(verbose_name='Created at', auto_now_add=True)
     tracks = models.ManyToManyField(Track, verbose_name='Tracks', related_name='playlists')
-    cover = models.ImageField(upload_to='covers/', verbose_name='Cover',
-                              validators=[image_size_validator], allowed_extensions=['jpg', 'png'])
+    cover = models.ImageField(upload_to='covers/', verbose_name='Cover', null=True, blank=True,
+                              validators=[image_size_validator,
+                                          FileExtensionValidator(allowed_extensions=['jpg', 'png'])],)
 
     class Meta:
         verbose_name = 'Playlist'
@@ -79,7 +82,7 @@ class Comment(models.Model):
     """ Comment model """
     parent = models.ForeignKey('self', on_delete=models.CASCADE, verbose_name='Parent', related_name='children',
                                null=True, blank=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='User', related_name='comments')
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='User', related_name='comments')
     text = models.TextField(verbose_name='Text')
     created_at = models.DateTimeField(verbose_name='Created at', auto_now_add=True)
     updated_at = models.DateTimeField(verbose_name='Updated at', auto_now=True)
@@ -96,8 +99,8 @@ class Comment(models.Model):
 
 class LikedTracks(models.Model):
     """ Liked tracks model """
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='User', related_name='liked_tracks')
-    track = models.ForeignKey(Track, on_delete=models.CASCADE, verbose_name='Track', related_name='liked_tracks')
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='User')
+    track = models.ForeignKey(Track, on_delete=models.CASCADE, verbose_name='Track')
     created_at = models.DateTimeField(verbose_name='Created at', auto_now_add=True)
 
     class Meta:
@@ -110,8 +113,8 @@ class LikedTracks(models.Model):
 
 class ListenedTracks(models.Model):
     """ Listened tracks model """
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='User', related_name='listened_tracks')
-    track = models.ForeignKey(Track, on_delete=models.CASCADE, verbose_name='Track', related_name='listened_tracks')
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='User')
+    track = models.ForeignKey(Track, on_delete=models.CASCADE, verbose_name='Track')
     date_of_listening = models.DateTimeField(verbose_name='Created at', auto_now_add=True)
 
     class Meta:

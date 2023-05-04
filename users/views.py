@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from users.authentication import JWTAuthentication
-from users.permissions import IsThatUserOrStaff
+from base.permissions import IsThatUserOrStaff
 from users import serializers
 from users.services import get_user_subscribers, subscribe_user, get_users, get_user, get_user_subscriptions
 

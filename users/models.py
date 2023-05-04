@@ -29,14 +29,19 @@ class User(AbstractUser):
     username = models.CharField(max_length=63, unique=True)
     social_links = models.ManyToManyField('SocialMedia', through='SocialLink', verbose_name='Social links')
 
-    created_tracks = models.ManyToManyField(Track, verbose_name='Created tracks')
-    liked_tracks = models.ManyToManyField(Track, through=LikedTracks, verbose_name='Liked tracks')
-    listened_tracks = models.ManyToManyField(Track, through=ListenedTracks, verbose_name='Listened tracks')
-    created_playlists = models.ManyToManyField(Playlist, verbose_name='Created playlists')
-    liked_playlists = models.ManyToManyField(Playlist, verbose_name='Liked playlists')
-    created_albums = models.ManyToManyField(Album, verbose_name='Created albums')
-    liked_albums = models.ManyToManyField(Album, verbose_name='Liked albums')
-    liked_genres = models.ManyToManyField(Genre, verbose_name='Liked genres')
+    created_tracks = models.ManyToManyField(Track, verbose_name='Created tracks', related_name='created_tracks')
+    liked_tracks = models.ManyToManyField(Track, through=LikedTracks,
+                                          verbose_name='Liked tracks',
+                                          related_name='liked_tracks')
+    listened_tracks = models.ManyToManyField(Track, through=ListenedTracks,
+                                             verbose_name='Listened tracks',
+                                             related_name='listened_tracks')
+    created_playlists = models.ManyToManyField(Playlist, verbose_name='Created playlists',
+                                               related_name='created_playlists')
+    liked_playlists = models.ManyToManyField(Playlist, verbose_name='Liked playlists', related_name='liked_playlists')
+    created_albums = models.ManyToManyField(Album, verbose_name='Created albums', related_name='created_albums')
+    liked_albums = models.ManyToManyField(Album, verbose_name='Liked albums', related_name='liked_albums')
+    liked_genres = models.ManyToManyField(Genre, verbose_name='Liked genres', related_name='liked_genres')
 
     REQUIRED_FIELDS = ["email", "phone"]
 
