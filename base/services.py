@@ -34,6 +34,10 @@ def get_image_html(img, width=50):
     """ Getting image in admin panel """
     return mark_safe(f"<img src='{img.url}' width={width}>") if img else "Изображение отсутствует"
 
+def get_audio_html(audio):
+    """ Getting audio in admin panel """
+    return mark_safe(f"<audio controls src='{audio.url}'></audio>")
+
 
 def get_user_track_path(instance, filename):
     """ Getting path to users track. Format: media/music/user_id/album_name/track_name"""

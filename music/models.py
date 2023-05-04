@@ -1,7 +1,7 @@
 from django.core.validators import FileExtensionValidator
 from django.db import models
 
-from base.services import image_size_validator
+from base.services import image_size_validator, track_size_validator
 
 
 class Album(models.Model):
@@ -33,7 +33,9 @@ class Track(models.Model):
     text = models.TextField(verbose_name='Lyrics')
     description = models.TextField(verbose_name='Description')
     album = models.ForeignKey(Album, on_delete=models.CASCADE, verbose_name='Album', related_name='tracks')
-    media_file = models.FileField(upload_to='tracks/', verbose_name='Track')
+    media_file = models.FileField(upload_to='tracks/', verbose_name='Track',
+                                  validators=[FileExtensionValidator(allowed_extensions=['mp3', 'wav', 'flac']),
+                                              track_size_validator])
     auditions = models.PositiveIntegerField(verbose_name='Auditions', default=0)
     likes = models.PositiveIntegerField(verbose_name='Likes', default=0)
 
