@@ -1,7 +1,7 @@
 from django.core.validators import FileExtensionValidator
 from django.db import models
 
-from base.services import image_size_validator, track_size_validator
+from base.services import image_size_validator, track_size_validator, get_audio_duration, get_audio_name_from_file
 
 
 class Album(models.Model):
@@ -29,7 +29,7 @@ class Album(models.Model):
 
 class Track(models.Model):
     """ Track model """
-    name = models.CharField(max_length=255, verbose_name='Title')
+    name = models.CharField(max_length=255, verbose_name='Title', blank=True)
     text = models.TextField(verbose_name='Lyrics')
     description = models.TextField(verbose_name='Description')
     album = models.ForeignKey(Album, on_delete=models.CASCADE, verbose_name='Album', related_name='tracks')
@@ -38,10 +38,20 @@ class Track(models.Model):
                                               track_size_validator])
     auditions = models.PositiveIntegerField(verbose_name='Auditions', default=0)
     likes = models.PositiveIntegerField(verbose_name='Likes', default=0)
+    duration = models.CharField(max_length=6, verbose_name='Duration', blank=True)
+
 
     class Meta:
         verbose_name = 'Track'
         verbose_name_plural = 'Tracks'
+
+
+    def save(self, *args, **kwargs):
+        if not self.duration:
+            self.duration = get_audio_duration(self.media_file)
+        if not self.name:
+            self.name = get_audio_name_from_file(self.media_file)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
