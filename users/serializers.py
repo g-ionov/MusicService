@@ -14,6 +14,13 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('username', 'phone', 'email', 'subscribers', 'subscriptions', 'main_image', 'background_image')
 
 
+class OnlyUsernameSerializer(serializers.ModelSerializer):
+    """ Users username serializer """
+    class Meta:
+        model = User
+        fields = ('username',)
+
+
 class SimpleUserSerializer(serializers.ModelSerializer):
     """Serializer for user with simple information"""
 

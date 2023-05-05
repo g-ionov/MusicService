@@ -29,17 +29,22 @@ class User(AbstractUser):
     username = models.CharField(max_length=63, unique=True)
     social_links = models.ManyToManyField('SocialMedia', through='SocialLink', verbose_name='Social links')
 
-    created_tracks = models.ManyToManyField(Track, verbose_name='Created tracks', related_name='created_tracks')
+    created_tracks = models.ManyToManyField(Track, verbose_name='Created tracks',
+                                            related_name='created_tracks', blank=True)
     liked_tracks = models.ManyToManyField(Track, through=LikedTracks,
                                           verbose_name='Liked tracks',
-                                          related_name='liked_tracks')
+                                          related_name='liked_tracks',
+                                          blank=True)
     listened_tracks = models.ManyToManyField(Track, through=ListenedTracks,
                                              verbose_name='Listened tracks',
-                                             related_name='listened_tracks')
-    liked_playlists = models.ManyToManyField(Playlist, verbose_name='Liked playlists', related_name='liked_playlists')
-    created_albums = models.ManyToManyField(Album, verbose_name='Created albums', related_name='created_albums')
-    liked_albums = models.ManyToManyField(Album, verbose_name='Liked albums', related_name='liked_albums')
-    liked_genres = models.ManyToManyField(Genre, verbose_name='Liked genres', related_name='liked_genres')
+                                             related_name='listened_tracks',
+                                             blank=True)
+    liked_playlists = models.ManyToManyField(Playlist, verbose_name='Liked playlists',
+                                             related_name='liked_playlists', blank=True)
+    created_albums = models.ManyToManyField(Album, verbose_name='Created albums',
+                                            related_name='created_albums', blank=True)
+    liked_albums = models.ManyToManyField(Album, verbose_name='Liked albums', related_name='liked_albums', blank=True)
+    liked_genres = models.ManyToManyField(Genre, verbose_name='Liked genres', related_name='liked_genres', blank=True)
 
     REQUIRED_FIELDS = ["email", "phone"]
 
