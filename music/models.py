@@ -29,6 +29,9 @@ class Album(models.Model):
 
 class Track(models.Model):
     """ Track model """
+    STATUS_CHOICES = [('on_inspection', 'On inspection'), ('published', 'Published'),
+                      ('rejected', 'Rejected'), ('deleted', 'Deleted')]
+
     name = models.CharField(max_length=255, verbose_name='Title', blank=True)
     text = models.TextField(verbose_name='Lyrics')
     description = models.TextField(verbose_name='Description')
@@ -39,6 +42,7 @@ class Track(models.Model):
     auditions = models.PositiveIntegerField(verbose_name='Auditions', default=0)
     likes = models.PositiveIntegerField(verbose_name='Likes', default=0)
     duration = models.CharField(max_length=6, verbose_name='Duration', blank=True)
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='on_inspection')
 
 
     class Meta:
