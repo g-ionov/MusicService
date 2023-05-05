@@ -6,10 +6,11 @@ from base.services import get_image_html, get_audio_html
 @admin.register(Track)
 class TrackAdmin(admin.ModelAdmin):
     """ Track admin """
-    list_display = ('id', 'name', 'album', 'auditions', 'likes', 'duration', 'get_audio')
+    list_display = ('id', 'name', 'album', 'status', 'auditions', 'likes', 'duration', 'get_audio')
     search_fields = ('name',)
     list_display_links = ('id', 'name')
     readonly_fields = ('get_audio', 'duration', 'auditions', 'likes')
+    list_editable = ('status',)
 
     @staticmethod
     def get_audio(obj):
