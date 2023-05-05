@@ -29,8 +29,7 @@ class Album(models.Model):
 
 class Track(models.Model):
     """ Track model """
-    STATUS_CHOICES = [('on_inspection', 'On inspection'), ('published', 'Published'),
-                      ('rejected', 'Rejected'), ('deleted', 'Deleted')]
+    STATUS_CHOICES = [('on_inspection', 'On inspection'), ('published', 'Published'), ('rejected', 'Rejected')]
 
     name = models.CharField(max_length=255, verbose_name='Title', blank=True)
     text = models.TextField(verbose_name='Lyrics')
