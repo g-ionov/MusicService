@@ -20,7 +20,7 @@ class TrackAdmin(admin.ModelAdmin):
 @admin.register(Album)
 class AlbumAdmin(admin.ModelAdmin):
     """ Album admin """
-    list_display = ('id', 'name', 'date', 'genre', 'status')
+    list_display = ('id', 'name', 'date', 'status')
     search_fields = ('name',)
     list_filter = ('status', 'genre')
     readonly_fields = ('get_image',)

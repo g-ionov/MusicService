@@ -17,7 +17,7 @@ class Album(models.Model):
         validators=[image_size_validator, FileExtensionValidator(allowed_extensions=['jpg', 'png'])])
     description = models.TextField(verbose_name='Description')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
-    genre = models.ForeignKey('Genre', on_delete=models.SET_NULL, verbose_name='Genre', related_name='albums', null=True)
+    genre = models.ManyToManyField('Genre', verbose_name='Genre', related_name='albums')
 
     class Meta:
         verbose_name = 'Album'
