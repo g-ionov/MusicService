@@ -2,11 +2,11 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
 from music import serializers
-from music.services import album_services, track_services, music_services
+from music.services import album_services, track_services, music_services, genre_services
 from base.permissions import IsThatUserOrReadOnly
 
 
@@ -15,7 +15,7 @@ class TrackViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter, OrderingFilter, DjangoFilterBackend]
     search_fields = ['name', 'album__name', 'created_tracks__username']
     ordering_fields = ['name', 'album__name', 'created_tracks__username', 'auditions', 'likes']
-    filterset_fields = ['album__genre__name']
+    filter_fields = ['album__genre__name']
 
     def get_serializer_class(self):
         if self.action in ('retrieve', 'update', 'partial_update'):
@@ -51,7 +51,7 @@ class AlbumViewSet(viewsets.ModelViewSet):
     """ Album viewset """
     filter_backends = [SearchFilter, OrderingFilter, DjangoFilterBackend]
     search_fields = ['name', 'created_albums__username']
-    filterset_fields = ['genre__name']
+    filter_fields = ['genre__name']
     ordering_fields = ['name', 'date', 'created_albums__username']
 
     def get_queryset(self):
@@ -82,3 +82,21 @@ class AlbumViewSet(viewsets.ModelViewSet):
         instance = self.get_queryset()
         serializer = self.get_serializer(instance, many=True)
         return Response(serializer.data)
+
+
+class GenreViewSet(viewsets.ModelViewSet):
+    """ Genre viewset """
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [DjangoFilterBackend]
+    filter_fields = ['name']
+
+    def get_queryset(self):
+        if self.action == 'retrieve':
+            return genre_services.get_genre_detail(self.kwargs.get('pk'))
+        return genre_services.get_genres()
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return serializers.SimpleGenreSerializer
+        return serializers.GenreSerializer
+

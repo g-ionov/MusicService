@@ -12,6 +12,14 @@ class SimpleGenreSerializer(serializers.ModelSerializer):
         fields = ('name',)
 
 
+class GenreSerializer(serializers.ModelSerializer):
+    """ Genre serializer """
+
+    class Meta:
+        model = Genre
+        fields = ('name', 'description')
+
+
 class TrackSerializer(serializers.ModelSerializer):
     """ Track serializer """
     cover = serializers.ImageField(read_only=True, source='album.cover')
@@ -102,3 +110,5 @@ class AlbumCreateOrUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Album
         fields = ('name', 'cover', 'genre', 'description',)
+
+
