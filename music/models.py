@@ -7,7 +7,7 @@ from base.services import image_size_validator, track_size_validator, get_audio_
 class Album(models.Model):
     """ Album model """
 
-    STATUS_CHOICES = [('draft', 'Draft'), ('published', 'Published')]
+    STATUS_CHOICES = [('draft', 'Draft'), ('published', 'Published'), ('on_inspection', 'On inspection')]
 
     name = models.CharField(max_length=255, verbose_name='Title')
     date = models.DateField(verbose_name='Date', auto_now_add=True)
@@ -16,7 +16,7 @@ class Album(models.Model):
         verbose_name='Cover',
         validators=[image_size_validator, FileExtensionValidator(allowed_extensions=['jpg', 'png'])])
     description = models.TextField(verbose_name='Description')
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
+    status = models.CharField(max_length=13, choices=STATUS_CHOICES, default='draft')
     genre = models.ManyToManyField('Genre', verbose_name='Genre', related_name='albums')
 
     class Meta:
