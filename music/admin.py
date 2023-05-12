@@ -40,7 +40,7 @@ class PlaylistAdmin(admin.ModelAdmin):
     """ Playlist admin """
     list_display = ('id', 'name', 'user')
     search_fields = ('name',)
-    readonly_fields = ('get_image',)
+    readonly_fields = ('get_image', 'likes')
     list_display_links = ('id', 'name')
 
     def get_image(self, obj):

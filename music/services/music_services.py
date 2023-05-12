@@ -1,6 +1,3 @@
-from music.models import Track
-
-
 def mark_as_inspecting(instance) -> None:
     """ Mark as inspecting
     :arg instance: Track or Album instance"""
