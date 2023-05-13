@@ -1,13 +1,15 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
 from rest_framework.response import Response
 
 from music import serializers
-from music.services import album_services, track_services, music_services, genre_services, playlist_services
+from music.services import album_services, track_services, music_services, genre_services, playlist_services, \
+    comment_service
 from base.permissions import IsThatUserIsMusicAuthorOrReadOnly, IsThatUserIsPlaylistAuthorOrReadOnly
+from music.services.music_services import create
 
 
 class TrackViewSet(viewsets.ModelViewSet):
@@ -43,6 +45,10 @@ class TrackViewSet(viewsets.ModelViewSet):
         elif self.action == 'listen':
             return [AllowAny()]
         return [IsThatUserIsMusicAuthorOrReadOnly()]
+
+    @create
+    def create(self, request, instance):
+        track_services.add_author_to_track(request.user.pk, instance)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -97,6 +103,10 @@ class AlbumViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         return [IsAuthenticated()] if self.action in ('create', 'my_albums') else [IsThatUserIsMusicAuthorOrReadOnly()]
+
+    @create
+    def create(self, request, instance):
+        album_services.add_author_to_album(request.user.pk, instance)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -160,6 +170,9 @@ class PlaylistViewSet(viewsets.ModelViewSet):
         return [IsAuthenticated()] if self.action in ('create', 'my_playlists', 'like', 'liked_playlists', 'add_track',
                                                       'remove_track') else [IsThatUserIsPlaylistAuthorOrReadOnly()]
 
+    def perform_create(self, serializer):
+        serializer.save(user_id=self.request.user.pk)
+
     @action(methods=['get'], detail=False, url_path='my-playlists', url_name='my-playlists')
     def my_playlists(self, request):
         return Response(self.get_serializer(self.get_queryset(), many=True).data)
@@ -185,3 +198,19 @@ class PlaylistViewSet(viewsets.ModelViewSet):
         required params: track_id. Track id must be in request.data
         """
         return Response(status=playlist_services.remove_track_from_playlist(pk, request.data.get('track_id')))
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    """ Comment viewset """
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        if self.action == 'list':
+            return comment_service.get_comments_for_track(self.kwargs.get('track_pk'))
+        return comment_service.get_comments()
+
+    def get_serializer_class(self):
+        return serializers.CommentSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)

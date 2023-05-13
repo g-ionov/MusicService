@@ -48,3 +48,8 @@ def like(album_id: int, user: User) -> int:
 
     Album.objects.get(pk=album_id).user_liked.remove(user)
     return status.HTTP_204_NO_CONTENT
+
+
+def add_author_to_album(user_id: int, instance: Album) -> None:
+    """ Add author during creation album """
+    User.objects.get(pk=user_id).created_albums.add(instance)

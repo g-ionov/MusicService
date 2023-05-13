@@ -67,3 +67,8 @@ def like_playlist(playlist_id: int, user: User) -> int:
     user.liked_playlists.add(playlist_id)
     Playlist.objects.filter(pk=playlist_id).update(likes=F('likes') + 1)
     return status.HTTP_201_CREATED
+
+
+def add_author_to_playlist(user_id: int, instance: Playlist) -> None:
+    """ Add author during creation album """
+    Playlist.objects.filter(pk=instance.pk).update(user_id=user_id)

@@ -58,3 +58,8 @@ def like_track(track_id: int, user: User) -> int:
     LikedTracks.objects.filter(Q(track_id=track_id) & Q(user=user)).delete()
     Track.objects.filter(pk=track_id).update(likes=F('likes') - 1)
     return status.HTTP_204_NO_CONTENT
+
+
+def add_author_to_track(user_id: int, instance: Track) -> None:
+    """ Add author during creation track """
+    User.objects.get(pk=user_id).created_tracks.add(instance)
