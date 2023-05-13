@@ -8,5 +8,6 @@ router.register(r'track', views.TrackViewSet, basename='track')
 router.register(r'album', views.AlbumViewSet, basename='album')
 router.register(r'genre', views.GenreViewSet, basename='genre')
 router.register(r'playlist', views.PlaylistViewSet, basename='playlist')
+router.register(r'comment', views.CommentViewSet, basename='comment')
 
-urlpatterns = [path('', include(router.urls))]
+urlpatterns = [path('', include(router.urls)),]

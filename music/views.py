@@ -1,14 +1,15 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status
+from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 
 from music import serializers
 from music.services import album_services, track_services, music_services, genre_services, playlist_services, \
-    comment_service
-from base.permissions import IsThatUserIsMusicAuthorOrReadOnly, IsThatUserIsPlaylistAuthorOrReadOnly
+    comment_services
+from base.permissions import IsThatUserIsMusicAuthorOrReadOnly, IsThatUserIsAuthorOrReadOnly
 from music.services.music_services import create
 
 
@@ -168,7 +169,7 @@ class PlaylistViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         return [IsAuthenticated()] if self.action in ('create', 'my_playlists', 'like', 'liked_playlists', 'add_track',
-                                                      'remove_track') else [IsThatUserIsPlaylistAuthorOrReadOnly()]
+                                                      'remove_track') else [IsThatUserIsAuthorOrReadOnly()]
 
     def perform_create(self, serializer):
         serializer.save(user_id=self.request.user.pk)
@@ -200,17 +201,40 @@ class PlaylistViewSet(viewsets.ModelViewSet):
         return Response(status=playlist_services.remove_track_from_playlist(pk, request.data.get('track_id')))
 
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(mixins.CreateModelMixin,
+                   mixins.RetrieveModelMixin,
+                   mixins.UpdateModelMixin,
+                   mixins.DestroyModelMixin,
+                   GenericViewSet):
     """ Comment viewset """
-    permission_classes = [IsAuthenticatedOrReadOnly]
-
     def get_queryset(self):
-        if self.action == 'list':
-            return comment_service.get_comments_for_track(self.kwargs.get('track_pk'))
-        return comment_service.get_comments()
+        if self.action == 'retrieve':
+            print(self.kwargs)
+            return comment_services.get_comments_for_track(self.kwargs.get('pk'))
+        return comment_services.get_comments()
 
     def get_serializer_class(self):
+        if self.action in ('update', 'partial_update', 'reply'):
+            return serializers.CommentUpdateSerializer
+        elif self.action == 'create':
+            return serializers.CommentCreateSerializer
         return serializers.CommentSerializer
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        serializer.save(user_id=self.request.user.pk)
+
+    def get_permissions(self):
+        if self.action in ('update', 'partial_update', 'destroy'):
+            return [IsThatUserIsAuthorOrReadOnly()]
+        elif self.action == 'retrieve':
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def retrieve(self, request, *args, **kwargs):
+        """ Retrieve comment. ID in URL is track_id """
+        return Response(self.get_serializer(self.get_queryset(), many=True).data)
+
+    @action(methods=['post'], detail=True, url_path='reply', url_name='reply')
+    def reply(self, request, pk):
+        serializer = self.get_serializer(data=request.data)
+        return Response(status=comment_services.reply(request.user, serializer.validated_data.get('text'), pk))

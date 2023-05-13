@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'django_filters',
     'phonenumber_field',
     'social_django',
+    'mptt',
     "debug_toolbar",
 
     'music',

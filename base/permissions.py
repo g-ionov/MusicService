@@ -13,8 +13,8 @@ class IsThatUserOrReadOnly(permissions.BasePermission):
         return obj.pk == request.user.pk or request.method in permissions.SAFE_METHODS
 
 
-class IsThatUserIsPlaylistAuthorOrReadOnly(permissions.BasePermission):
-    """ Check that the user can only change his playlist """
+class IsThatUserIsAuthorOrReadOnly(permissions.BasePermission):
+    """ Check that the user can only change his playlist. This permission is used for models with author field. """
     def has_object_permission(self, request, view, obj):
         return obj.user == request.user or request.method in permissions.SAFE_METHODS
 

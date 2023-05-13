@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from music.models import Track, Genre, Album, Playlist
+from music.models import Track, Genre, Album, Playlist, Comment
 from users.serializers import OnlyUsernameSerializer
 
 
@@ -136,3 +136,43 @@ class PlaylistCreateOrUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Playlist
         fields = ('name', 'description', 'cover', 'public')
+
+
+class RecursiveField(serializers.Serializer):
+    def to_representation(self, instance):
+        serializer = self.parent.parent.__class__(instance, context=self.context)
+        return serializer.data
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    """ Comment serializer """
+    user_id = serializers.IntegerField(read_only=True, source='user.id')
+    username = serializers.CharField(read_only=True, source='user.username')
+    children = RecursiveField(many=True, read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ('id', 'user_id', 'username', 'text', 'updated_at', 'children')
+
+
+class CommentCreateSerializer(serializers.ModelSerializer):
+    """ Comment create serializer """
+    track_id = serializers.IntegerField()
+
+    class Meta:
+        model = Comment
+        fields = ('text', 'track_id')
+
+
+class CommentUpdateSerializer(serializers.ModelSerializer):
+    """ Comment update serializer """
+    class Meta:
+        model = Comment
+        fields = ('text',)
+
+
+class CommentReplySerializer(serializers.ModelSerializer):
+    """ Comment reply serializer """
+    class Meta:
+        model = Comment
+        fields = ('text', 'parent_id')

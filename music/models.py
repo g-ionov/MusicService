@@ -1,5 +1,7 @@
 from django.core.validators import FileExtensionValidator
 from django.db import models
+from mptt.fields import TreeForeignKey
+from mptt.models import MPTTModel
 
 from base.services import image_size_validator, track_size_validator, get_audio_duration, get_audio_name_from_file
 
@@ -94,9 +96,9 @@ class Playlist(models.Model):
         return self.name
 
 
-class Comment(models.Model):
+class Comment(MPTTModel):
     """ Comment model """
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, verbose_name='Parent', related_name='children',
+    parent = TreeForeignKey('self', on_delete=models.CASCADE, verbose_name='Parent', related_name='children',
                                null=True, blank=True)
     user = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='User', related_name='comments')
     text = models.TextField(verbose_name='Text')
@@ -108,6 +110,10 @@ class Comment(models.Model):
     class Meta:
         verbose_name = 'Comment'
         verbose_name_plural = 'Comments'
+
+
+    class MPTTMeta:
+        order_insertion_by = ['created_at']
 
     def __str__(self):
         return self.text[:20]
