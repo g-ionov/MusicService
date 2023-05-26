@@ -3,6 +3,7 @@ from rest_framework import status
 
 from music.models import Playlist
 from users.models import User
+from music.tasks import add_like, remove_like
 
 
 def check_track_id(track_id: int) -> None:
@@ -62,10 +63,10 @@ def like_playlist(playlist_id: int, user: User) -> int:
     """
     if user.liked_playlists.filter(pk=playlist_id).exists():
         user.liked_playlists.remove(playlist_id)
-        Playlist.objects.filter(pk=playlist_id).update(likes=F('likes') - 1)
+        remove_like.delay('Playlist', playlist_id)
         return status.HTTP_204_NO_CONTENT
     user.liked_playlists.add(playlist_id)
-    Playlist.objects.filter(pk=playlist_id).update(likes=F('likes') + 1)
+    add_like.delay('Playlist', playlist_id)
     return status.HTTP_201_CREATED
 
 

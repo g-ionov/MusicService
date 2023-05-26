@@ -77,12 +77,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'musicservice',
-        'USER': 'admin',
-        'PASSWORD': 'admin',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': os.environ.get('DB_HOST'),
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD')
     }
 }
 
@@ -193,3 +192,5 @@ SOCIAL_AUTH_YANDEX_OAUTH2_SECRET = 'cd764c14907444428ae11a8c2b5a7a9f'
 SOCIAL_AUTH_VK_OAUTH2_KEY = '51526276'
 SOCIAL_AUTH_VK_OAUTH2_SECRET = 'bb9BDgpvrTHRtgwQkGaR'
 SOCIAL_AUTH_VK_OAUTH2_SCOPE = ['email']
+
+CELERY_BROKER_URL = 'redis://redis:6379/0'

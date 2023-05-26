@@ -3,6 +3,7 @@ from rest_framework import status
 
 from music.models import Track, Genre, ListenedTracks, LikedTracks
 from users.models import User
+from music.tasks import add_like, remove_like, add_audition
 
 
 def get_tracks_with_album_name_and_author_name() -> QuerySet:
@@ -31,7 +32,7 @@ def get_liked_tracks(user: User) -> QuerySet:
 def listen_track(track_id: int, user: User) -> int:
     """ Listen track """
     ListenedTracks.objects.create(track_id=track_id, user=user)
-    Track.objects.filter(pk=track_id).update(auditions=F('auditions') + 1)
+    add_audition.delay(track_id)
     return status.HTTP_201_CREATED
 
 
@@ -52,11 +53,11 @@ def like_track(track_id: int, user: User) -> int:
 
     if not Track.objects.filter(Q(pk=track_id) & Q(user_liked=user)).exists():
         LikedTracks.objects.create(track_id=track_id, user=user)
-        Track.objects.filter(pk=track_id).update(likes=F('likes') + 1)
+        add_like.delay('Track', track_id)
         return status.HTTP_201_CREATED
 
     LikedTracks.objects.filter(Q(track_id=track_id) & Q(user=user)).delete()
-    Track.objects.filter(pk=track_id).update(likes=F('likes') - 1)
+    remove_like.delay('Track', track_id)
     return status.HTTP_204_NO_CONTENT
 
 
