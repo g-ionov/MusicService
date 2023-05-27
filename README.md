@@ -1,4 +1,5 @@
-#Music Service
+#MusicService
+
 This project provides a music service API created using Django REST Framework, Celery with Redis and Docker for containerization.
 The user module is covered by tests.
 This API also provides the ability to authenticate with OAuth2, JWT token and session.
